@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Authenticator Setup QR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 2rem; display: grid; place-items: center; }
+    .card { max-width: 480px; width: 100%; border: 1px solid rgba(0,0,0,.15); border-radius: 14px; padding: 1.5rem; }
+    h1 { font-size: 1.25rem; margin: 0 0 .75rem; }
+    .qr { display: grid; place-items: center; margin: 1rem 0; }
+    img { width: 220px; height: 220px; image-rendering: pixelated; }
+    code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .muted { opacity: .7; font-size: .9rem; }
+    .row { margin-top: .75rem; }
+    input[type="text"] { width: 100%; padding: .6rem .7rem; border-radius: 8px; border: 1px solid rgba(0,0,0,.2); }
+    button { padding: .55rem .8rem; border-radius: 8px; border: 1px solid rgba(0,0,0,.2); background: transparent; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Scan to set up your Authenticator</h1>
+
+    <div class="qr">
+      <img id="qr" alt="Authenticator QR Code" src="" />
+    </div>
+
+    <div class="row muted">If you can’t scan, copy the URL below into your authenticator app (most support pasting an <code>otpauth://</code> link):</div>
+    <div class="row">
+      <input id="uri" type="text" spellcheck="false" class="mono" />
+    </div>
+
+    <div class="row">
+      <button id="copyBtn">Copy URL</button>
+      <span id="copied" class="muted" style="display:none;">Copied!</span>
+    </div>
+  </div>
+
+  <script>
+    // ======= REPLACE THIS WITH YOUR OWN otpauth:// URL =======
+    const OTP_AUTH_URI = "otpauth://totp/YourIssuer:email@example.com?secret=JBSWY3DPEHPK3PXP&issuer=YourIssuer&digits=6";
+    // ========================================================
+
+    const uriInput = document.getElementById('uri');
+    const qrImg = document.getElementById('qr');
+    const copyBtn = document.getElementById('copyBtn');
+    const copied = document.getElementById('copied');
+
+    function updateQR(u) {
+      // QRServer API
+      const base = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=";
+      qrImg.src = base + encodeURIComponent(u);
+    }
+
+    // Initialize
+    uriInput.value = OTP_AUTH_URI;
+    updateQR(OTP_AUTH_URI);
+
+    // If you edit the field, the QR updates live
+    uriInput.addEventListener('input', () => updateQR(uriInput.value));
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(uriInput.value);
+        copied.style.display = "inline";
+        setTimeout(() => copied.style.display = "none", 1200);
+      } catch {}
+    });
+  </script>
+</body>
+</html>
