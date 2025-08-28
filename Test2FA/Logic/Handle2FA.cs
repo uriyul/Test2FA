@@ -62,7 +62,7 @@ namespace Test2FA.Logic
                 return null;
             }
 
-            string authenticatorUri = $"otpauth://totp/{Uri.EscapeDataString("My2FaTestApp")}:{Uri.EscapeDataString(user.Email)}?secret={user.TwoFASecret}&issuer={Uri.EscapeDataString("My2FaTestApp")}&digits=6";
+            string authenticatorUri = $"otpauth://totp/{Uri.EscapeDataString("My2FaTestApp")}:{Uri.EscapeDataString(user.Email)}?secret={user.GetAuthenticatorKey()}&issuer={Uri.EscapeDataString("My2FaTestApp")}&digits=6&algorithm=SHA1&period=30";
             user.TwoFactorEnabled = true;
 
             return authenticatorUri;
@@ -76,14 +76,14 @@ namespace Test2FA.Logic
             {
                 UserName = "admin@My2FaTestApp.com",
                 Email = "admin@My2FaTestApp.com",
-                TwoFASecret = "JBSWY3DPE",
-                TwoFactorEnabled = true
+                //TwoFASecret = "JBSWY3DPE",
+                //TwoFactorEnabled = true
 
-                #endregion
             };
-            user.SetAuthenticatorKey("JBSWY3DPE");
+            user.SetAuthenticatorKey("JBSWY3DPEHPK3PXP");
 
             var result = userManager.CreateAsync(user, "Password1!").Result;
         }
+        #endregion
     }
 }

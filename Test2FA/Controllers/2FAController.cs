@@ -28,6 +28,14 @@ namespace Test2FA.Controllers
             return Ok(rc);
         }
 
+        /// <summary>
+        /// This endpoint first authenticates the user using username and password.
+        /// Then it creates a string for a QR code for the authenticator app
+        /// Then it marks the user as a 2FA user, so he will not be able to sign in witout the authenticator code.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns>A string for Authenticator QR code</returns>
         [HttpPost("2faqr")]
         public ActionResult<string> Generate2FAQR(string username, string password)
         {

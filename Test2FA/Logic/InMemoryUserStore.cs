@@ -7,6 +7,10 @@ using Test2FA.Model;
 
 namespace Test2FA.Logic
 {
+    /// <summary>
+    /// This is a class that replaces the need for a DB for the sake of simplicity of this sample code.
+    /// Note that everything is in-memory, so it wipes clean when the application shuts down.
+    /// </summary>
     public class InMemoryUserStore :
         IUserStore<ApplicationUser>,
         IUserPasswordStore<ApplicationUser>,
