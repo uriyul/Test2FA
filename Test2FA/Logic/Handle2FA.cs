@@ -20,6 +20,12 @@ namespace Test2FA.Logic
 
         public ApplicationUser Login(string username, string password, string code)
         {
+            if(string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                Console.WriteLine("Missing username or password");
+                return null;
+            }
+            
             var rc = signInManager.PasswordSignInAsync(username, password, false, false).Result;
 
 
@@ -42,6 +48,11 @@ namespace Test2FA.Logic
                 return user;
             }
 
+            if(string.IsNullOrEmpty(code))
+            {
+                Console.WriteLine("Missing Authenticator code");
+                return null;
+            }
 
             var result = signInManager.TwoFactorAuthenticatorSignInAsync(code, false, false).Result;
 
@@ -62,7 +73,7 @@ namespace Test2FA.Logic
                 return null;
             }
 
-            string authenticatorUri = $"otpauth://totp/{Uri.EscapeDataString("My2FaTestApp")}:{Uri.EscapeDataString(user.Email)}?secret={user.GetAuthenticatorKey()}&issuer={Uri.EscapeDataString("My2FaTestApp")}&digits=6&algorithm=SHA1&period=30";
+            string authenticatorUri = $"otpauth://totp/{Uri.EscapeDataString("My2FaTestApp")}:{Uri.EscapeDataString(user.Email)}?secret={user.AuthenticatorKey}&issuer={Uri.EscapeDataString("My2FaTestApp")}&digits=6&algorithm=SHA1&period=30";
             user.TwoFactorEnabled = true;
 
             return authenticatorUri;
@@ -76,11 +87,10 @@ namespace Test2FA.Logic
             {
                 UserName = "admin@My2FaTestApp.com",
                 Email = "admin@My2FaTestApp.com",
-                //TwoFASecret = "JBSWY3DPE",
+                AuthenticatorKey = "JBSWY3DPEHPK3PXP",
                 //TwoFactorEnabled = true
 
             };
-            user.SetAuthenticatorKey("JBSWY3DPEHPK3PXP");
 
             var result = userManager.CreateAsync(user, "Password1!").Result;
         }

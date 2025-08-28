@@ -94,12 +94,12 @@ namespace Test2FA.Logic
         // Authenticator key store
         public Task SetAuthenticatorKeyAsync(ApplicationUser user, string key, CancellationToken cancellationToken)
         {
-            user.SetAuthenticatorKey(key);
+            user.AuthenticatorKey = key;
             return Task.CompletedTask;
         }
 
         public Task<string> GetAuthenticatorKeyAsync(ApplicationUser user, CancellationToken cancellationToken)
-            => Task.FromResult(user.GetAuthenticatorKey());
+            => Task.FromResult(user.AuthenticatorKey);
 
         public Task SetEmailAsync(ApplicationUser user, string email, CancellationToken cancellationToken)
         {
