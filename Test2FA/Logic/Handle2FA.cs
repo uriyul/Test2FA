@@ -20,46 +20,55 @@ namespace Test2FA.Logic
 
         public ApplicationUser Login(string username, string password, string code)
         {
-            if(string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            try
             {
-                Console.WriteLine("Missing username or password");
-                return null;
+                if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+                {
+                    Console.WriteLine("Missing username or password");
+                    return null;
+                }
+
+                var rc = signInManager.PasswordSignInAsync(username, password, false, false).Result;
+
+
+                if (rc.IsNotAllowed)
+                {
+                    Console.WriteLine("User is not allowed to login");
+                    return null;
+                }
+
+                var user = userManager.FindByNameAsync(username).Result;
+                if (user == null)
+                {
+                    Console.WriteLine("Failed to find user");
+                    return null;
+                }
+
+                if (rc.Succeeded && !rc.RequiresTwoFactor)
+                {
+                    Console.WriteLine("Login successful, no 2FA needed");
+                    return user;
+                }
+
+                if (string.IsNullOrEmpty(code))
+                {
+                    Console.WriteLine("Missing Authenticator code");
+                    return null;
+                }
+
+                var result = signInManager.TwoFactorAuthenticatorSignInAsync(code, false, false).Result;
+
+                if (result.Succeeded)
+                {
+                    Console.WriteLine("Login successful with 2FA");
+                    return user;
+                }
+
+                Console.WriteLine("2FA Login failed!");
             }
-            
-            var rc = signInManager.PasswordSignInAsync(username, password, false, false).Result;
-
-
-            if (rc.IsNotAllowed)
+            catch (Exception ex)
             {
-                Console.WriteLine("User is not allowed to login");
-                return null;
-            }
-
-            var user = userManager.FindByNameAsync(username).Result;
-            if (user == null)
-            {
-                Console.WriteLine("Failed to find user");
-                return null;
-            }
-
-            if (rc.Succeeded && !rc.RequiresTwoFactor)
-            {
-                Console.WriteLine("Login successful, no 2FA needed");
-                return user;
-            }
-
-            if(string.IsNullOrEmpty(code))
-            {
-                Console.WriteLine("Missing Authenticator code");
-                return null;
-            }
-
-            var result = signInManager.TwoFactorAuthenticatorSignInAsync(code, false, false).Result;
-
-            if (result.Succeeded)
-            {
-                Console.WriteLine("Login successful with 2FA");
-                return user;
+                Console.WriteLine($"Failed login: {ex}");
             }
 
             return null;
@@ -76,6 +85,9 @@ namespace Test2FA.Logic
             string authenticatorUri = $"otpauth://totp/{Uri.EscapeDataString("My2FaTestApp")}:{Uri.EscapeDataString(user.Email)}?secret={user.AuthenticatorKey}&issuer={Uri.EscapeDataString("My2FaTestApp")}&digits=6&algorithm=SHA1&period=30";
             user.TwoFactorEnabled = true;
 
+            // Returning here the Authenticator URI from which to create the QR.
+            // In the production code we'll return a QR image to be displayed on the GUI.
+            // We can use the following open source library for that matter: https://github.com/codebude/QRCoder (install using: Install-Package QRCoder)
             return authenticatorUri;
         }
 
